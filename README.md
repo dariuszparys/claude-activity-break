@@ -23,7 +23,7 @@ start of the next step.
 At the prompt of a terminal session:
 
 ```
-/plugin install activity-break --marketplace dariuszparys/activity-break
+/plugin install activity-break --marketplace dariuszparys/claude-activity-break
 ```
 
 Answer `y` to add the marketplace, then press Enter for the user scope.
@@ -31,12 +31,12 @@ Answer `y` to add the marketplace, then press Enter for the user scope.
 From a shell:
 
 ```
-claude plugin install activity-break --marketplace dariuszparys/activity-break
+claude plugin install activity-break --marketplace dariuszparys/claude-activity-break
 ```
 
 In the desktop app, where `/plugin` does not run: click + next to the prompt
-box, then Plugins, Add marketplace with `dariuszparys/activity-break`, then
-Add plugin.
+box, then Plugins, Add marketplace with `dariuszparys/claude-activity-break`,
+then Add plugin.
 
 ## One clock across sessions
 

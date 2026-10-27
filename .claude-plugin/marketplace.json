@@ -1,5 +1,5 @@
 {
-  "name": "activity-break",
+  "name": "claude-activity-break",
   "owner": { "name": "Dariusz Parys" },
   "description": "Activity Break, a Claude Code mod that interrupts you every hour for a two-minute break away from the keyboard.",
   "plugins": [{ "name": "activity-break", "source": "./" }]

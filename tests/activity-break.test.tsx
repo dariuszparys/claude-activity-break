@@ -53,7 +53,7 @@ function engine(on: On, files: Record<string, string> = {}, idle: { ms: number }
   const fills: string[] = []
   const closed: string[] = []
 
-  on('command.register', () => ({ value: { command: 'move' } }))
+  on('command.register', () => ({ value: { command: 'activity' } }))
   on('ui.open', () => ({ value: { isPlaced: true } }))
   on('ui.close', (_, e) => {
     closed.push(e.id)
@@ -249,7 +249,7 @@ test('strict mode holds a typed prompt while the break is due and gives it back 
   await band.press({ key: 'band-start' })
   await band.unmount()
 
-  const done = await $.command.run({ ...TYPED, command: 'move', args: 'done' })
+  const done = await $.command.run({ ...TYPED, command: 'activity', args: 'done' })
   expect(done.text).toMatch(/^Strict mode counts a break only when the routine finishes/)
 
   await world.clock.advance(30_000 + 90_000)
@@ -264,17 +264,17 @@ test('strict mode allows two skips a day', async ($, on) => {
   engine(on, { [FILE]: file(61, { isStrict: true }) })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
 
-  expect((await $.command.run({ ...TYPED, command: 'move', args: 'skip' })).text).toBe('Skipped. The hour starts over. 1 skips left today.')
-  expect((await $.command.run({ ...TYPED, command: 'move', args: 'snooze' })).text).toBe('Snoozed for 10 min. 0 skips left today.')
-  expect((await $.command.run({ ...TYPED, command: 'move', args: 'skip' })).text).toMatch(/^No skips left today/)
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: 'skip' })).text).toBe('Skipped. The hour starts over. 1 skips left today.')
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: 'snooze' })).text).toBe('Snoozed for 10 min. 0 skips left today.')
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: 'skip' })).text).toMatch(/^No skips left today/)
 })
 
-test('/move off turns the mod off in every session until /move on', async ($, on) => {
+test('/activity off turns the mod off in every session until /activity on', async ($, on) => {
   const world = engine(on, { [FILE]: file(61, { isStrict: true }) })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
 
-  const off = await $.command.run({ ...TYPED, command: 'move', args: 'off' })
-  expect(off.text).toBe('Activity break is off in every session, until /move on.')
+  const off = await $.command.run({ ...TYPED, command: 'activity', args: 'off' })
+  expect(off.text).toBe('Activity break is off in every session, until /activity on.')
   expect(world.saved().settings.isEnabled).toBe(false)
   expect(world.status.at(-1)).toBeUndefined()
   expect(world.closed).toEqual(['activity-break'])
@@ -287,9 +287,9 @@ test('/move off turns the mod off in every session until /move on', async ($, on
 
   await world.clock.advance(3 * 60 * MINUTE)
   expect(world.toasts.filter(t => t.startsWith('Time to move'))).toHaveLength(0)
-  expect((await $.command.run({ ...TYPED, command: 'move', args: 'start' })).text).toMatch(/is off/)
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: 'start' })).text).toMatch(/is off/)
 
-  const back = await $.command.run({ ...TYPED, command: 'move', args: 'on' })
+  const back = await $.command.run({ ...TYPED, command: 'activity', args: 'on' })
   expect(back.text).toBe('Activity break is on. The hour starts now.')
   expect(world.status.at(-1)).toBe('move ▱▱▱▱▱▱▱▱▱▱ 60m')
 })
@@ -310,7 +310,7 @@ test('on macOS, strict mode holds the routine clock while hands are on the keybo
   const idle = { ms: 500 }
   const world = engine(on, { [FILE]: file(61, { isStrict: true }) }, idle)
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
-  expect((await $.command.run({ ...TYPED, command: 'move', args: 'start' })).text).toMatch(/^Break started/)
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: 'start' })).text).toMatch(/^Break started/)
 
   await world.clock.advance(3000)
   expect(world.status.at(-1)).toBe('break 1/2 · 00:30 · hands off the keyboard')
@@ -356,11 +356,11 @@ test('a headless run with nobody attached keeps the clock but never alerts until
   expect(world.toasts.at(-1)).toMatch(/^Time to move/)
 })
 
-test('/move off 2h pauses, and the minutes can be set', async ($, on) => {
+test('/activity off 2h pauses, and the minutes can be set', async ($, on) => {
   engine(on, { [FILE]: file(10) })
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
 
-  expect((await $.command.run({ ...TYPED, command: 'move', args: '45' })).text).toMatch(/^Next break in 35:00 \(45 min\)/)
-  expect((await $.command.run({ ...TYPED, command: 'move', args: 'off 2h' })).text).toMatch(/^Breaks paused until \d\d:\d\d/)
-  expect((await $.command.run({ ...TYPED, command: 'move', args: 'later' })).text).toMatch(/^Usage:/)
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: '45' })).text).toMatch(/^Next break in 35:00 \(45 min\)/)
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: 'off 2h' })).text).toMatch(/^Breaks paused until \d\d:\d\d/)
+  expect((await $.command.run({ ...TYPED, command: 'activity', args: 'later' })).text).toMatch(/^Usage:/)
 })

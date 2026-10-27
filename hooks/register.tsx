@@ -244,7 +244,7 @@ async function advance($: EngineInterface, r: BreakRoutine, s: BreakShared, t: n
 async function startBreak($: EngineInterface): Promise<string> {
   const t = await $.clock.now()
   const s = await read($, shared)
-  if (phaseOf(s, t) === 'disabled') return 'Activity break is turned off. Turn it on with /move on.'
+  if (phaseOf(s, t) === 'disabled') return 'Activity break is turned off. Turn it on with /activity on.'
   const exercises = routineSteps()
   const first = exercise(exercises[0]!)
   await update($, routine, () => ({ status: 'running', exercises, step: 0, leftMs: first.seconds * 1000, isHeld: false }))
@@ -283,7 +283,7 @@ async function useEscape($: EngineInterface, apply: (s: BreakShared, t: number) 
   const t = await $.clock.now()
   const s = await read($, shared)
   if (s.settings.isStrict && escapesLeft(s, t) === 0) {
-    return 'No skips left today in strict mode. Take the break (/move start), or turn breaks off for a while (/move off 2h).'
+    return 'No skips left today in strict mode. Take the break (/activity start), or turn breaks off for a while (/activity off 2h).'
   }
   await update($, routine, () => null)
   const after = await change($, apply)
@@ -299,27 +299,27 @@ async function setSwitch($: EngineInterface, isEnabled: boolean): Promise<string
 
   return isEnabled
     ? 'Activity break is on. The hour starts now.'
-    : 'Activity break is off in every session, until /move on.'
+    : 'Activity break is off in every session, until /activity on.'
 }
 
 function describe(s: BreakShared, r: BreakRoutine | null, t: number): string {
   const phase = phaseOf(s, t)
   const mode = `${s.settings.minutes} min${s.settings.isStrict ? ', strict' : ''}`
-  if (phase === 'disabled') return 'Activity break is off. /move on turns it back on.'
+  if (phase === 'disabled') return 'Activity break is off. /activity on turns it back on.'
   if (r !== null) return `Break ${r.step + 1} of ${r.exercises.length}: ${exercise(r.exercises[r.step]!).name}, ${clock(r.leftMs)} left.`
   if (phase === 'off') return `Activity break is paused until ${timeOfDay(s.clock.offUntil ?? t)} (${mode}).`
-  if (phase === 'due') return `Break due (${mode}). /move start begins it. ${s.log.breaks} breaks today.`
+  if (phase === 'due') return `Break due (${mode}). /activity start begins it. ${s.log.breaks} breaks today.`
 
   return `Next break in ${clock(s.clock.dueAt - t)} (${mode}). ${s.log.breaks} breaks today, streak ${s.log.streak} days.`
 }
 
 const USAGE = [
-  'Usage: /move [start|done|away|snooze [min]|skip|off [2h]|on|strict on|off|sound on|off|<minutes>]',
-  '  /move           status, and opens the pane',
-  '  /move start     start the break routine now',
-  '  /move 45        a break every 45 minutes',
-  '  /move off       turn the mod off in every session, until /move on',
-  '  /move off 2h    pause breaks for two hours',
+  'Usage: /activity [start|done|away|snooze [min]|skip|off [2h]|on|strict on|off|sound on|off|<minutes>]',
+  '  /activity           status, and opens the pane',
+  '  /activity start     start the break routine now',
+  '  /activity 45        a break every 45 minutes',
+  '  /activity off       turn the mod off in every session, until /activity on',
+  '  /activity off 2h    pause breaks for two hours',
 ].join('\n')
 
 async function boot($: EngineInterface): Promise<void> {
@@ -334,7 +334,7 @@ async function boot($: EngineInterface): Promise<void> {
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
-      name: 'move',
+      name: 'activity',
       description: 'Activity break: status, start or skip a break, set the minutes, or turn the mod off and on',
       argumentHint: '[start|snooze|skip|off|on|strict on|off|<minutes>]',
       immediate: true,
@@ -351,7 +351,7 @@ export const register: Register = on => {
     return next(e)
   })
 
-  on('command.run', { command: 'move' }, async ($, e) => {
+  on('command.run', { command: 'activity' }, async ($, e) => {
     const args = e.args.trim().toLowerCase()
     const [word = '', value = ''] = args.split(/\s+/)
     const isOn = value === 'on' || value === 'true'
@@ -372,15 +372,15 @@ export const register: Register = on => {
       await update($, routine, () => null)
       await giveBack($)
 
-      return { text: `Breaks paused until ${timeOfDay(s.clock.offUntil ?? 0)}. /move on resumes them.` }
+      return { text: `Breaks paused until ${timeOfDay(s.clock.offUntil ?? 0)}. /activity on resumes them.` }
     }
 
     const s = await read($, shared)
-    if (!s.settings.isEnabled) return { text: 'Activity break is off. /move on turns it back on.' }
+    if (!s.settings.isEnabled) return { text: 'Activity break is off. /activity on turns it back on.' }
 
     if (word === 'start' || word === 'now') return { text: await startBreak($) }
     if (word === 'done' || word === 'away') {
-      if (s.settings.isStrict) return { text: 'Strict mode counts a break only when the routine finishes: /move start.' }
+      if (s.settings.isStrict) return { text: 'Strict mode counts a break only when the routine finishes: /activity start.' }
 
       return { text: await finishBreak($, 'away') }
     }
@@ -423,7 +423,7 @@ export const register: Register = on => {
     await update($, held, () => e.text)
 
     return {
-      drop: `Activity break due after ${s.settings.minutes} min at the keyboard. Your prompt is held and comes back when the break is done. Start it above the prompt or with /move start (/move skip: ${escapesLeft(s, t)} left today).`,
+      drop: `Activity break due after ${s.settings.minutes} min at the keyboard. Your prompt is held and comes back when the break is done. Start it above the prompt or with /activity start (/activity skip: ${escapesLeft(s, t)} left today).`,
     }
   })
 
@@ -661,7 +661,7 @@ export const register: Register = on => {
               />
             </Box>
             <Button key="disable" label="Turn off everywhere" onPress={() => void setSwitch($, false)} />
-            {isTerminal && <Text dimColor>/move off 2h pauses, /move off turns it off</Text>}
+            {isTerminal && <Text dimColor>/activity off 2h pauses, /activity off turns it off</Text>}
           </Box>
         )}
       </Box>

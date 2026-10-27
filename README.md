@@ -53,25 +53,25 @@ run or SDK job with nothing attached does not take part.
 
 | Command | Does |
 | --- | --- |
-| `/move` | Status, and opens the pane |
-| `/move start` | Start the break now |
-| `/move 45` | A break every 45 minutes (15 to 180) |
-| `/move snooze [min]` | Snooze, 10 minutes by default |
-| `/move skip` | Restart the hour without a break |
-| `/move away` | Count the break: you were away (not in strict mode) |
-| `/move strict on` / `off` | Strict mode |
-| `/move sound on` / `off` | The chime |
-| `/move off 2h` | Pause breaks for a while (`90m`, `30`) |
-| `/move off` | Turn the mod off, in every session, until `/move on` |
-| `/move on` | Turn it back on; the hour starts fresh |
+| `/activity` | Status, and opens the pane |
+| `/activity start` | Start the break now |
+| `/activity 45` | A break every 45 minutes (15 to 180) |
+| `/activity snooze [min]` | Snooze, 10 minutes by default |
+| `/activity skip` | Restart the hour without a break |
+| `/activity away` | Count the break: you were away (not in strict mode) |
+| `/activity strict on` / `off` | Strict mode |
+| `/activity sound on` / `off` | The chime |
+| `/activity off 2h` | Pause breaks for a while (`90m`, `30`) |
+| `/activity off` | Turn the mod off, in every session, until `/activity on` |
+| `/activity on` | Turn it back on; the hour starts fresh |
 
 ## Turning it off
 
-- **For now, everywhere:** `/move off`, or **Adjust → Turn off everywhere** in
-  the pane. Off, the mod shows nothing, holds no prompts and plays no chime in
-  any session until `/move on`. The switch is stored in the state file, so it
-  holds across restarts.
-- **For a while:** `/move off 2h`.
+- **For now, everywhere:** `/activity off`, or **Adjust → Turn off
+  everywhere** in the pane. Off, the mod shows nothing, holds no prompts and
+  plays no chime in any session until `/activity on`. The switch is stored in
+  the state file, so it holds across restarts.
+- **For a while:** `/activity off 2h`.
 - **The mod itself:** disable the plugin in Claude Code with
   `claude plugin disable activity-break`, or with `/plugin` in a terminal
   session. Delete `~/.claude/activity-break.json` to forget its history.

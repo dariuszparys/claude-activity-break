@@ -1,0 +1,8 @@
+{
+  "name": "activity-break",
+  "version": "0.1.0",
+  "description": "Every hour at the keyboard, a guided two-minute exercise break, with a move bar in the status line and an optional strict mode that holds new prompts until you have moved.",
+  "author": { "name": "Dariusz Parys" },
+  "license": "MIT",
+  "types": "./types/index.d.ts"
+}
